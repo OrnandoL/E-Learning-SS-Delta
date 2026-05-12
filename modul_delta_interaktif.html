@@ -1,0 +1,1815 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Modul DELTA Interaktif</title>
+  <style>
+    :root {
+      --bg: #f6f1e6;
+      --bg-soft: #efe4c8;
+      --surface: rgba(255, 252, 246, 0.88);
+      --surface-strong: rgba(255, 252, 247, 0.98);
+      --ink: #17261f;
+      --muted: #617168;
+      --accent: #0f766e;
+      --accent-soft: rgba(15, 118, 110, 0.12);
+      --warm: #d97706;
+      --warm-soft: rgba(217, 119, 6, 0.12);
+      --violet: #6d4fc2;
+      --chapter-accent: #0f766e;
+      --chapter-accent-soft: rgba(15, 118, 110, 0.12);
+      --chapter-warm: #d97706;
+      --chapter-warm-soft: rgba(217, 119, 6, 0.12);
+      --chapter-hero: rgba(15, 118, 110, 0.9);
+      --line: rgba(23, 38, 31, 0.1);
+      --shadow-lg: 0 22px 54px rgba(63, 49, 18, 0.14);
+      --shadow-md: 0 14px 34px rgba(41, 35, 17, 0.1);
+      --shadow-sm: 0 8px 20px rgba(41, 35, 17, 0.08);
+      --radius-2xl: 30px;
+      --radius-xl: 24px;
+      --radius-lg: 18px;
+      --radius-md: 14px;
+      --max-copy: 66ch;
+      --transition: 180ms ease;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Aptos", "Segoe UI Variable Text", "Trebuchet MS", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at top left, rgba(15, 118, 110, 0.18), transparent 22%),
+        radial-gradient(circle at top right, rgba(217, 119, 6, 0.16), transparent 20%),
+        linear-gradient(135deg, var(--bg), var(--bg-soft));
+    }
+    button, input { font: inherit; }
+    button {
+      border: 0;
+      cursor: pointer;
+      transition: transform var(--transition), box-shadow var(--transition), background var(--transition), border-color var(--transition), opacity var(--transition);
+    }
+    button:hover { transform: translateY(-2px); box-shadow: var(--shadow-sm); }
+    button:focus-visible {
+      outline: 3px solid var(--chapter-accent-soft);
+      outline-offset: 2px;
+    }
+    h1, h2, h3 {
+      margin: 0;
+      font-family: "Georgia", "Palatino Linotype", serif;
+      letter-spacing: -0.02em;
+    }
+    p { margin: 0; }
+    .page {
+      max-width: 1460px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1.35fr) minmax(300px, 0.85fr);
+      gap: 20px;
+      padding: 24px;
+      background: linear-gradient(135deg, rgba(18, 37, 33, 0.97), var(--chapter-hero));
+      color: #fff8ee;
+      border-radius: var(--radius-2xl);
+      box-shadow: var(--shadow-lg);
+    }
+    .hero-copy { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+    .eyebrow {
+      width: fit-content;
+      padding: 8px 14px;
+      border-radius: 999px;
+      background: rgba(255, 248, 238, 0.12);
+      color: #fff0d7;
+      font-size: 0.84rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .hero h1 {
+      font-size: clamp(2rem, 3vw, 3.25rem);
+      line-height: 1.02;
+      max-width: 9ch;
+    }
+    .hero p {
+      max-width: var(--max-copy);
+      color: rgba(255, 248, 238, 0.9);
+      line-height: 1.72;
+      font-size: 1rem;
+    }
+    .hero-actions, .hero-tools, .action-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .hero-note, .route-banner, .helper-banner {
+      padding: 14px 16px;
+      border-radius: var(--radius-lg);
+      line-height: 1.6;
+    }
+    .hero-note {
+      background: rgba(255, 248, 238, 0.12);
+      border: 1px solid rgba(255, 248, 238, 0.12);
+      color: rgba(255, 248, 238, 0.92);
+      max-width: 58ch;
+    }
+    .hero-status { display: grid; gap: 14px; align-content: start; }
+    .glass-card {
+      background: rgba(255, 248, 238, 0.1);
+      border: 1px solid rgba(255, 248, 238, 0.12);
+      border-radius: var(--radius-xl);
+      padding: 18px;
+      backdrop-filter: blur(12px);
+    }
+    .status-head, .progress-summary {
+      display: flex;
+      gap: 14px;
+      align-items: center;
+    }
+    .status-head { justify-content: space-between; margin-bottom: 14px; }
+    .status-head span, .tiny-label {
+      color: rgba(255, 248, 238, 0.72);
+      font-size: 0.84rem;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+    }
+    .ring {
+      width: 76px;
+      height: 76px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      position: relative;
+      background: conic-gradient(#fff6e6 calc(var(--progress) * 1%), rgba(255, 248, 238, 0.16) 0);
+      flex: none;
+    }
+    .ring::after {
+      content: "";
+      position: absolute;
+      inset: 9px;
+      border-radius: 50%;
+      background: rgba(18, 37, 33, 0.88);
+    }
+    .ring span { position: relative; z-index: 1; font-weight: 700; }
+    .hero-grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+    .stat-card {
+      padding: 14px;
+      border-radius: var(--radius-lg);
+      background: rgba(255, 248, 238, 0.08);
+      border: 1px solid rgba(255, 248, 238, 0.12);
+    }
+    .stat-card strong { display: block; font-size: 1.05rem; }
+    .stat-card small { display: block; margin-top: 6px; color: rgba(255, 248, 238, 0.78); line-height: 1.45; }
+    .workspace {
+      display: grid;
+      grid-template-columns: 320px minmax(0, 1fr);
+      gap: 20px;
+      margin-top: 20px;
+    }
+    .rail, .study-shell {
+      border-radius: var(--radius-2xl);
+      background: var(--surface);
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow-md);
+      backdrop-filter: blur(12px);
+    }
+    .rail { position: sticky; top: 20px; padding: 18px; height: fit-content; }
+    .rail-section + .rail-section { margin-top: 18px; }
+    .rail h2 { font-size: 1.12rem; margin-bottom: 8px; }
+    .muted, .caption, .rail p { color: var(--muted); line-height: 1.6; }
+    .route-stack, .chapter-stack, .column, .list-grid, .quiz-grid, .game-grid { display: grid; gap: 10px; }
+    .route-btn, .chapter-btn, .chip-btn, .action-btn {
+      width: 100%;
+      text-align: left;
+      border-radius: 16px;
+    }
+    .route-btn, .chapter-btn {
+      padding: 14px 14px 13px;
+      background: rgba(255, 255, 255, 0.72);
+      border: 1px solid rgba(23, 38, 31, 0.08);
+      color: var(--ink);
+    }
+    .route-btn.active, .chapter-btn.active {
+      background: linear-gradient(135deg, var(--chapter-accent-soft), var(--chapter-warm-soft));
+      border-color: var(--chapter-accent-soft);
+    }
+    .chapter-btn.done {
+      background: linear-gradient(135deg, rgba(18, 107, 79, 0.16), rgba(18, 107, 79, 0.06));
+      border-color: rgba(18, 107, 79, 0.16);
+    }
+    .chapter-btn.recommended { box-shadow: inset 0 0 0 1px rgba(217, 119, 6, 0.16); }
+    .chapter-btn.dimmed { opacity: 0.58; }
+    .route-btn small, .chapter-btn small { display: block; margin-top: 5px; color: var(--muted); line-height: 1.45; }
+    .route-progress-card, .xp-card, .badge-section, .route-card, .section-card {
+      padding: 16px 18px;
+      border-radius: var(--radius-lg);
+      background: rgba(255, 255, 255, 0.8);
+      border: 1px solid rgba(23, 38, 31, 0.08);
+    }
+    .route-progress-card {
+      background: linear-gradient(135deg, rgba(15, 118, 110, 0.08), rgba(109, 79, 194, 0.08));
+      border: 1px solid rgba(15, 118, 110, 0.12);
+    }
+    .progress-bar {
+      height: 10px;
+      border-radius: 999px;
+      background: rgba(23, 38, 31, 0.08);
+      overflow: hidden;
+      margin-top: 10px;
+    }
+    .progress-bar span {
+      display: block;
+      height: 100%;
+      width: 0;
+      border-radius: inherit;
+      background: linear-gradient(90deg, var(--chapter-accent), var(--chapter-warm));
+      transition: width 240ms ease;
+    }
+    .study-shell { padding: 18px; }
+    .study-header {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 16px;
+      align-items: start;
+      margin-bottom: 14px;
+    }
+    .chapter-title {
+      margin-top: 6px;
+      font-size: clamp(1.8rem, 3vw, 2.5rem);
+      line-height: 1.05;
+      max-width: 14ch;
+    }
+    .meta-row { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
+    .meta-pill, .badge-pill, .xp-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      font-size: 0.88rem;
+      border: 1px solid transparent;
+    }
+    .meta-pill {
+      background: var(--chapter-accent-soft);
+      color: #114a45;
+      border-color: var(--chapter-accent-soft);
+    }
+    .route-banner {
+      margin: 14px 0 18px;
+      background: linear-gradient(135deg, var(--chapter-accent-soft), rgba(109, 79, 194, 0.08));
+      border: 1px solid var(--chapter-accent-soft);
+      color: #21453f;
+    }
+    .helper-banner {
+      margin-bottom: 12px;
+      background: rgba(255, 255, 255, 0.75);
+      border: 1px dashed rgba(23, 38, 31, 0.14);
+      color: var(--muted);
+    }
+    .flow-guide {
+      margin-bottom: 14px;
+      padding: 16px 18px;
+      border-radius: var(--radius-lg);
+      background: linear-gradient(135deg, rgba(15, 118, 110, 0.09), rgba(255, 255, 255, 0.88));
+      border: 1px solid rgba(15, 118, 110, 0.14);
+    }
+    .flow-guide.warning {
+      background: linear-gradient(135deg, rgba(217, 119, 6, 0.12), rgba(255, 255, 255, 0.9));
+      border-color: rgba(217, 119, 6, 0.18);
+    }
+    .flow-guide.success {
+      background: linear-gradient(135deg, rgba(18, 107, 79, 0.1), rgba(255, 255, 255, 0.9));
+      border-color: rgba(18, 107, 79, 0.16);
+    }
+    .flow-guide-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: start;
+    }
+    .flow-guide h3 {
+      font-size: 1.08rem;
+      margin-bottom: 6px;
+    }
+    .flow-guide p {
+      max-width: var(--max-copy);
+      line-height: 1.65;
+      color: #21453f;
+    }
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    .legend-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 11px;
+      border-radius: 999px;
+      font-size: 0.82rem;
+      border: 1px solid rgba(23, 38, 31, 0.08);
+      background: rgba(255, 255, 255, 0.82);
+      color: var(--muted);
+    }
+    .legend-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      flex: none;
+    }
+    .legend-dot.current { background: #0f766e; }
+    .legend-dot.done { background: #126b4f; }
+    .legend-dot.next { background: #d97706; }
+    .legend-dot.available { background: #6d4fc2; }
+    .legend-dot.later { background: #9ca3af; }
+    .stepper {
+      display: grid;
+      grid-template-columns: repeat(10, minmax(0, 1fr));
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+    .step {
+      display: grid;
+      gap: 5px;
+      justify-items: center;
+      text-align: center;
+      padding: 10px 6px;
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.75);
+      border: 1px solid rgba(23, 38, 31, 0.08);
+      transition: transform var(--transition), background var(--transition), border-color var(--transition), opacity var(--transition);
+    }
+    .step strong {
+      width: 28px;
+      height: 28px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      font-size: 0.88rem;
+      background: rgba(23, 38, 31, 0.06);
+    }
+    .step small { display: block; color: var(--muted); font-size: 0.72rem; line-height: 1.3; }
+    .step.current { background: linear-gradient(135deg, rgba(15, 118, 110, 0.16), rgba(15, 118, 110, 0.08)); border-color: rgba(15, 118, 110, 0.22); box-shadow: 0 12px 26px rgba(15, 118, 110, 0.12); }
+    .step.current strong { background: #0f766e; color: #f8fffc; }
+    .step.done { background: linear-gradient(135deg, rgba(18, 107, 79, 0.14), rgba(18, 107, 79, 0.06)); border-color: rgba(18, 107, 79, 0.16); }
+    .step.done strong { background: #126b4f; color: #effcf7; }
+    .step.next { background: linear-gradient(135deg, rgba(217, 119, 6, 0.16), rgba(217, 119, 6, 0.08)); border-color: rgba(217, 119, 6, 0.2); box-shadow: inset 0 0 0 1px rgba(217, 119, 6, 0.08); }
+    .step.next strong { background: #d97706; color: #fff7ed; }
+    .step.available { background: linear-gradient(135deg, rgba(109, 79, 194, 0.1), rgba(109, 79, 194, 0.04)); border-color: rgba(109, 79, 194, 0.14); }
+    .step.available strong { background: rgba(109, 79, 194, 0.16); color: #5a43a0; }
+    .step.later { opacity: 0.54; }
+    .chapter-btn.current {
+      background: linear-gradient(135deg, rgba(15, 118, 110, 0.16), rgba(15, 118, 110, 0.08));
+      border-color: rgba(15, 118, 110, 0.22);
+    }
+    .chapter-btn.next {
+      background: linear-gradient(135deg, rgba(217, 119, 6, 0.16), rgba(217, 119, 6, 0.08));
+      border-color: rgba(217, 119, 6, 0.2);
+    }
+    .chapter-btn.available {
+      background: linear-gradient(135deg, rgba(109, 79, 194, 0.08), rgba(109, 79, 194, 0.03));
+      border-color: rgba(109, 79, 194, 0.12);
+    }
+    .chapter-btn.later { opacity: 0.56; }
+    .study-content {
+      display: grid;
+      grid-template-columns: minmax(0, 1.18fr) minmax(280px, 0.82fr);
+      gap: 18px;
+      align-items: start;
+    }
+    .section-card {
+      background: var(--surface-strong);
+      box-shadow: 0 8px 22px rgba(48, 38, 18, 0.05);
+    }
+    .section-card h3 { font-size: 1.18rem; margin-bottom: 12px; }
+    .section-card p { max-width: var(--max-copy); line-height: 1.75; }
+    .list-grid { list-style: none; padding: 0; margin: 0; }
+    .list-grid li {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      padding: 12px 13px;
+      border-radius: var(--radius-md);
+      background: rgba(15, 118, 110, 0.05);
+      border: 1px solid rgba(15, 118, 110, 0.08);
+      line-height: 1.58;
+    }
+    .list-index {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      flex: none;
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--chapter-accent);
+      background: var(--chapter-accent-soft);
+    }
+    .overview-card { background: linear-gradient(135deg, rgba(255, 255, 255, 0.88), rgba(255, 249, 239, 0.94)); border-color: var(--chapter-warm-soft); }
+    .term-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+    .chip-btn {
+      padding: 12px 13px;
+      background: rgba(109, 79, 194, 0.08);
+      color: #4c3a7e;
+      border: 1px solid rgba(109, 79, 194, 0.12);
+      font-weight: 700;
+    }
+    .chip-btn.active {
+      background: linear-gradient(135deg, rgba(109, 79, 194, 0.18), rgba(15, 118, 110, 0.12));
+      border-color: rgba(109, 79, 194, 0.24);
+    }
+    .term-panel {
+      margin-top: 12px;
+      padding: 14px;
+      border-radius: var(--radius-lg);
+      background: linear-gradient(135deg, rgba(109, 79, 194, 0.09), rgba(15, 118, 110, 0.06));
+      border: 1px solid rgba(109, 79, 194, 0.1);
+      line-height: 1.65;
+      min-height: 84px;
+      color: #43356a;
+    }
+    .example-card { background: linear-gradient(135deg, rgba(255, 252, 246, 0.95), rgba(242, 248, 246, 0.96)); }
+    .quiz-card { background: linear-gradient(135deg, rgba(217, 119, 6, 0.09), rgba(255, 255, 255, 0.88)); border-color: rgba(217, 119, 6, 0.14); }
+    .completion-panel {
+      display: none;
+      margin-top: 14px;
+      padding: 16px 18px;
+      border-radius: var(--radius-lg);
+      background: linear-gradient(135deg, rgba(18, 107, 79, 0.12), rgba(255, 255, 255, 0.92));
+      border: 1px solid rgba(18, 107, 79, 0.18);
+      box-shadow: 0 10px 24px rgba(18, 107, 79, 0.08);
+    }
+    .completion-panel.show { display: block; }
+    .completion-head {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+    }
+    .completion-icon {
+      width: 34px;
+      height: 34px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      flex: none;
+      background: rgba(18, 107, 79, 0.16);
+      color: #126b4f;
+      font-weight: 700;
+    }
+    .completion-copy strong {
+      display: block;
+      font-size: 1.04rem;
+      margin-bottom: 6px;
+      color: #114f3d;
+    }
+    .completion-copy p {
+      max-width: var(--max-copy);
+      color: #295144;
+      line-height: 1.62;
+    }
+    .pdf-reference-card {
+      margin-top: 18px;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.96), rgba(244, 249, 248, 0.96));
+      border-color: rgba(15, 118, 110, 0.12);
+    }
+    .pdf-reference-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: flex-start;
+      margin-bottom: 12px;
+    }
+    .pdf-reference-head p {
+      color: var(--muted);
+      max-width: 68ch;
+    }
+    .pdf-reference-status {
+      width: fit-content;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(15, 118, 110, 0.1);
+      color: #15534d;
+      border: 1px solid rgba(15, 118, 110, 0.12);
+      font-size: 0.88rem;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+    .pdf-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+    .pdf-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .pdf-preview-shell {
+      overflow: hidden;
+      border-radius: 22px;
+      border: 1px solid rgba(23, 38, 31, 0.08);
+      background: linear-gradient(135deg, rgba(248, 246, 241, 0.96), rgba(237, 245, 243, 0.96));
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.45);
+    }
+    .pdf-preview {
+      width: 100%;
+      height: min(78vh, 980px);
+      display: block;
+      border: 0;
+      background: rgba(255, 255, 255, 0.92);
+    }
+    .pdf-fallback {
+      min-height: 320px;
+      display: grid;
+      place-items: center;
+      padding: 22px;
+      text-align: center;
+      color: var(--muted);
+      line-height: 1.7;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.96), rgba(244, 249, 248, 0.96));
+    }
+    .pdf-fallback strong {
+      display: block;
+      margin-bottom: 8px;
+      color: var(--ink);
+      font-size: 1.04rem;
+    }
+    .pdf-reference-note {
+      margin-top: 12px;
+      color: var(--muted);
+      font-size: 0.95rem;
+      line-height: 1.65;
+    }
+    .check-card {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      padding: 12px 13px;
+      border-radius: var(--radius-md);
+      background: rgba(255, 255, 255, 0.88);
+      border: 1px solid rgba(23, 38, 31, 0.08);
+      transition: border-color var(--transition), background var(--transition), transform var(--transition);
+    }
+    .check-card:hover { transform: translateY(-1px); border-color: rgba(217, 119, 6, 0.18); }
+    .check-card input { margin-top: 4px; accent-color: var(--chapter-accent); }
+    .xp-card { background: linear-gradient(135deg, var(--chapter-accent-soft), rgba(255, 255, 255, 0.82)); }
+    .xp-pill {
+      width: fit-content;
+      margin-top: 12px;
+      background: var(--chapter-accent-soft);
+      color: var(--chapter-accent);
+      border: 1px solid var(--chapter-accent-soft);
+      font-weight: 700;
+    }
+    .badge-list { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+    .badge-pill {
+      background: rgba(23, 38, 31, 0.05);
+      color: var(--muted);
+      border-color: rgba(23, 38, 31, 0.08);
+    }
+    .badge-pill.unlocked {
+      background: linear-gradient(135deg, rgba(217, 119, 6, 0.16), rgba(15, 118, 110, 0.14));
+      color: #24463f;
+      border-color: rgba(15, 118, 110, 0.16);
+      font-weight: 700;
+    }
+    .action-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 12px 16px;
+      font-weight: 700;
+      border-radius: 16px;
+      text-decoration: none;
+    }
+    .action-btn.primary { background: linear-gradient(135deg, var(--chapter-accent), var(--chapter-warm)); color: #f3fffb; }
+    .action-btn.secondary { background: var(--chapter-warm-soft); color: #8b4d09; border: 1px solid var(--chapter-warm-soft); }
+    .action-btn.ghost { background: rgba(23, 38, 31, 0.06); color: var(--ink); border: 1px solid rgba(23, 38, 31, 0.08); }
+    .action-btn:disabled { cursor: default; opacity: 0.68; transform: none; box-shadow: none; }
+    .swap { animation: contentSwap 240ms ease; }
+    @keyframes contentSwap {
+      from { opacity: 0.42; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    body.focus-mode .rail, body.focus-mode .side-column { opacity: 0.18; pointer-events: none; filter: saturate(0.7); }
+    body.focus-mode .study-content { grid-template-columns: minmax(0, 1fr); }
+    @media (max-width: 1180px) {
+      .hero, .workspace, .study-content { grid-template-columns: 1fr; }
+      .rail { position: static; }
+      .stepper { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+      body.focus-mode .rail, body.focus-mode .side-column { display: none; }
+    }
+    @media (max-width: 760px) {
+      .page { padding: 14px; }
+      .hero, .rail, .study-shell, .section-card { padding: 16px; }
+      .study-header { grid-template-columns: 1fr; }
+      .hero-actions, .hero-tools, .action-row { flex-direction: column; }
+      .hero-grid-2, .term-grid { grid-template-columns: 1fr; }
+      .pdf-reference-head, .pdf-toolbar { flex-direction: column; align-items: stretch; }
+      .pdf-actions { flex-direction: column; }
+      .pdf-preview { height: 72vh; }
+      .stepper { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .route-stack {
+        grid-auto-flow: column;
+        grid-auto-columns: minmax(220px, 1fr);
+        overflow-x: auto;
+        padding-bottom: 4px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page" id="page">
+    <div class="workspace">
+      <aside class="rail" aria-label="Navigasi belajar">
+        <section class="rail-section">
+          <h2>Pilih Bab</h2>
+          <p>Bab yang sedang dipelajari, sudah selesai, dan langkah berikutnya akan diberi penanda yang jelas.</p>
+          <div class="chapter-stack" id="chapterButtons"></div>
+        </section>
+      </aside>
+
+      <main class="study-shell">
+        <section class="study-header">
+          <div>
+            <div class="caption">Bab aktif</div>
+            <h2 class="chapter-title" id="chapterTitle">Pengantar SS Online with DELTA</h2>
+            <div class="meta-row">
+              <div class="meta-pill" id="levelPill">Level: Dasar</div>
+              <div class="meta-pill" id="durationPill">Estimasi: 10 menit</div>
+              <div class="meta-pill" id="prereqPill">Prasyarat: Tidak ada</div>
+            </div>
+          </div>
+
+          <div class="hero-tools">
+            <button class="action-btn ghost" id="returnToRouteBtn">Kembali ke bab disarankan</button>
+            <button class="action-btn secondary" id="nextBtn">Bab berikutnya</button>
+            <button class="action-btn ghost" id="resetBtn">Reset progres</button>
+          </div>
+        </section>
+
+        <div class="stepper" id="stepper" aria-label="Posisi bab"></div>
+
+        <div class="study-content">
+          <section class="column main-column">
+            <article class="section-card overview-card swap" id="overviewCard">
+              <h3>Overview Bab</h3>
+              <p id="summaryText"></p>
+            </article>
+
+            <article class="section-card swap" id="goalsCard">
+              <h3>Tujuan Belajar</h3>
+              <ul class="list-grid" id="goalsList"></ul>
+            </article>
+
+            <article class="section-card swap" id="stepsCard">
+              <h3>Langkah Praktik</h3>
+              <ul class="list-grid" id="stepsList"></ul>
+            </article>
+
+            <article class="section-card quiz-card swap" id="quizCard">
+              <h3>Latihan dan Cek Pemahaman</h3>
+              <div class="quiz-grid" id="checksList"></div>
+              <div class="action-row">
+                <button class="action-btn primary" id="doneBtn">Konfirmasi selesai</button>
+              </div>
+              <div class="completion-panel" id="completionPanel">
+                <div class="completion-head">
+                  <div class="completion-icon">✓</div>
+                  <div class="completion-copy">
+                    <strong id="completionTitle">Bab berhasil dikonfirmasi selesai</strong>
+                    <p id="completionText">Bab ini sudah selesai. Apakah Anda ingin lanjut ke bab berikutnya yang direkomendasikan?</p>
+                  </div>
+                </div>
+                <div class="action-row">
+                  <button class="action-btn primary" id="completionNextBtn">Lanjut ke bab berikutnya</button>
+                  <button class="action-btn ghost" id="completionStayBtn">Tetap di bab ini</button>
+                </div>
+              </div>
+            </article>
+          </section>
+
+          <aside class="column side-column">
+            <article class="section-card swap" id="termsCard">
+              <h3>Istilah Penting</h3>
+              <div class="term-grid" id="termButtons"></div>
+              <div class="term-panel" id="termPanel">Klik salah satu istilah untuk melihat arti sederhananya.</div>
+            </article>
+
+            <article class="section-card example-card swap" id="exampleCard">
+              <h3>Contoh Sederhana</h3>
+              <ul class="list-grid" id="exampleList"></ul>
+            </article>
+
+            <article class="section-card swap" id="gameCard">
+              <h3>Momentum Belajar</h3>
+              <div class="game-grid">
+                <div class="xp-card">
+                  <strong id="xpTitle">Progress XP</strong>
+                  <p id="xpDescription">XP memberi rasa pencapaian kecil setiap kali satu bab selesai.</p>
+                  <div class="xp-pill" id="xpPill">0 XP</div>
+                </div>
+
+                <div class="badge-section">
+                  <strong>Badge Milestone</strong>
+                  <p class="muted">Badge terbuka saat progres Anda mencapai titik tertentu.</p>
+                  <div class="badge-list" id="badgeList"></div>
+                </div>
+
+                <div class="route-card">
+                  <strong id="routeCardTitle">Urutan Belajar</strong>
+                  <p id="routeCardText">Selesaikan bab secara berurutan agar progres pembelajaran tetap terarah.</p>
+                </div>
+              </div>
+            </article>
+          </aside>
+        </div>
+
+        <section class="section-card pdf-reference-card swap" id="pdfReferenceCard">
+          <div class="pdf-reference-head">
+            <div>
+              <h3>Referensi PDF Bab Ini</h3>
+              <p id="pdfReferenceText">Referensi ini menampilkan slide PDF yang paling relevan dengan bab yang sedang Anda pelajari.</p>
+            </div>
+            <div class="pdf-reference-status" id="pdfReferenceStatus">Slide 1 dari referensi bab</div>
+          </div>
+
+          <div class="pdf-toolbar">
+            <div class="pdf-actions">
+              <a class="action-btn primary" id="pdfOpenBtn" href="./SUGESSTION SYSTEM with DELTA.pdf" target="_blank" rel="noopener noreferrer">Buka PDF</a>
+            </div>
+          </div>
+
+          <div class="pdf-preview-shell">
+            <iframe
+              class="pdf-preview"
+              id="pdfPreview"
+              title="Preview PDF DELTA"
+              src="./SUGESSTION SYSTEM with DELTA.pdf#page=1&view=FitH"
+            ></iframe>
+          </div>
+
+          <p class="pdf-reference-note" id="pdfReferenceNote">Jika preview PDF tidak tampil di browser Anda, gunakan tombol buka PDF atau pilih slide referensi yang tersedia di atas.</p>
+        </section>
+      </main>
+    </div>
+
+    <footer class="hero">
+      <section class="hero-copy">
+        <div class="eyebrow">Learning App DELTA</div>
+        <h1>Belajar improvement dengan arah yang lebih jelas</h1>
+        <p>Halaman ini menyusun materi DELTA seperti aplikasi belajar: bab lebih mudah dipilih, progres terasa nyata, dan pengguna tetap dibimbing oleh urutan belajar yang jelas.</p>
+        <div class="hero-actions">
+          <button class="action-btn primary" id="startRouteBtn">Mulai dari bab disarankan</button>
+          <button class="action-btn ghost" id="focusToggleBtn">Aktifkan mode fokus</button>
+        </div>
+        <div class="hero-note" id="heroHelper">Belum ada bab yang selesai. Saran terbaik: mulai dari bab pertama agar alur DELTA terasa utuh sejak awal.</div>
+      </section>
+
+      <section class="hero-status">
+        <div class="glass-card">
+          <div class="status-head">
+            <span>Progress total</span>
+            <span id="completedCount">0 / 10 bab</span>
+          </div>
+          <div class="progress-summary">
+            <div class="ring" id="progressRing" style="--progress:0;"><span id="progressPercent">0%</span></div>
+            <div class="status-copy">
+              <strong id="progressHeadline">0 dari 10 bab selesai</strong>
+              <p id="progressSubcopy">Progres akan bertambah setiap kali satu bab dikonfirmasi selesai.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="hero-grid-2">
+          <div class="stat-card">
+            <strong id="heroXp">0 XP</strong>
+            <small>Setiap bab yang selesai memberi XP agar progres terasa lebih nyata.</small>
+          </div>
+          <div class="stat-card">
+            <strong id="heroRouteTitle">Bab berikutnya</strong>
+            <small id="heroRouteProgress">Bab yang disarankan akan muncul di sini.</small>
+          </div>
+        </div>
+      </section>
+    </footer>
+
+    <div class="route-banner" id="routeBanner">Urutan belajar ideal adalah mengikuti bab 1 sampai bab 10 secara berurutan agar alur DELTA dipahami secara utuh.</div>
+    <div class="helper-banner" id="helperBanner">Mulai dari sini jika Anda baru pertama kali belajar improvement atau belum paham alur besar DELTA.</div>
+    <div class="legend" id="flowLegend">
+      <div class="legend-pill"><span class="legend-dot current"></span>Sedang dipelajari</div>
+      <div class="legend-pill"><span class="legend-dot done"></span>Sudah selesai</div>
+      <div class="legend-pill"><span class="legend-dot next"></span>Langkah berikutnya</div>
+      <div class="legend-pill"><span class="legend-dot available"></span>Tersedia</div>
+      <div class="legend-pill"><span class="legend-dot later"></span>Bisa dipelajari nanti</div>
+    </div>
+    <div class="flow-guide" id="flowGuide">
+      <div class="flow-guide-head">
+        <div>
+          <h3 id="flowGuideTitle">Guide Flow Belajar</h3>
+          <p id="flowGuideText">Sistem akan menyorot langkah terbaik berikutnya agar urutan belajar tetap sesuai flow yang dirancang.</p>
+        </div>
+      </div>
+      <div class="action-row">
+        <button class="action-btn secondary" id="followFlowBtn">Ikuti urutan yang disarankan</button>
+        <button class="action-btn ghost" id="stayHereBtn">Lihat bab ini tetap</button>
+      </div>
+    </div>
+  </div>
+  <script>
+    const XP_PER_CHAPTER = 120;
+    const pdfSource = "./SUGESSTION SYSTEM with DELTA.pdf";
+
+    function expandPdfPages(start, end) {
+      return Array.from({ length: end - start + 1 }, (_, index) => start + index);
+    }
+
+    const chapters = [
+      {
+        id: "bab-1",
+        title: "Pengantar SS Online with DELTA",
+        level: "Dasar",
+        duration: "10 menit",
+        prereq: "Tidak ada",
+        startHint: "Mulai dari sini jika Anda baru pertama kali belajar improvement atau belum paham alur besar DELTA.",
+        goals: [
+          "Memahami apa itu SS Online with DELTA.",
+          "Memahami bahwa DELTA adalah metode improvement langkah demi langkah.",
+          "Memahami arah akhir improvement: masalah berkurang dan tidak terulang."
+        ],
+        summary: "DELTA adalah cara berpikir sistematis untuk berpindah dari masalah yang belum jelas menjadi perbaikan yang nyata, terukur, lalu dijaga lewat standar kerja. Alurnya sederhana: tentukan masalah, pahami kondisi nyata, tetapkan target, cari akar penyebab, rencanakan solusi, jalankan, evaluasi, lalu standarkan hasilnya.",
+        terms: {
+          "Improvement": "Upaya memperbaiki kondisi kerja agar lebih baik dari sebelumnya.",
+          "Problem solving": "Proses menyelesaikan masalah secara sistematis, bukan sekadar menebak solusi.",
+          "DELTA": "Metode delapan langkah untuk activity improvement dari awal sampai tindak lanjut."
+        },
+        steps: [
+          "Pahami dulu gambaran besar delapan langkah DELTA.",
+          "Jangan langsung lompat ke solusi sebelum tahu masalah dan penyebabnya.",
+          "Biasakan memakai data dan kondisi nyata sebagai dasar keputusan."
+        ],
+        example: [
+          "Masalah: tools maintenance sering hilang.",
+          "Target: kehilangan tool menjadi nol.",
+          "Solusi: buat lemari dan aturan pengembalian tools.",
+          "Tindak lanjut: buat SOP peminjaman dan pengecekan harian."
+        ],
+        checks: [
+          "Jelaskan DELTA dengan bahasa Anda sendiri dalam 3 sampai 5 kalimat.",
+          "Kenapa solusi tidak boleh dibuat sebelum penyebab masalah dipahami?"
+        ]
+      },
+      {
+        id: "bab-2",
+        title: "Kesadaran Akan Masalah",
+        level: "Dasar",
+        duration: "20 menit",
+        prereq: "Bab 1",
+        startHint: "Mulai dari sini jika Anda masih bingung apakah sesuatu benar-benar masalah atau hanya kondisi biasa.",
+        goals: [
+          "Mampu mengenali masalah di lingkungan kerja.",
+          "Mampu membedakan kondisi normal, aktual, dan ideal.",
+          "Mampu memahami bahwa masalah muncul karena ada gap."
+        ],
+        summary: "Materi ini mengajak kita sadar bahwa masalah biasanya muncul saat kondisi aktual tidak sama dengan standar, target, atau kondisi ideal. Dari sinilah improvement dimulai. Kita perlu melihat langsung area kerja, menemukan ketidaknormalan, lalu membedakan mana masalah yang paling penting untuk diperbaiki.",
+        terms: {
+          "Genba": "Melihat langsung kondisi nyata di lapangan, bukan hanya mendengar laporan.",
+          "Gap": "Selisih antara kondisi sekarang dengan kondisi yang seharusnya.",
+          "Muda": "Pemborosan yang tidak memberi nilai tambah.",
+          "Mura": "Ketidakrataan atau ketidakkonsistenan proses.",
+          "Muri": "Beban berlebihan pada orang, alat, atau proses."
+        },
+        steps: [
+          "Datangi area kerja dan lihat masalah secara langsung.",
+          "Bandingkan kondisi aktual dengan standar atau target.",
+          "Catat hal yang tidak normal, lambat, salah, hilang, rusak, atau boros.",
+          "Pilih masalah dengan dampak paling besar."
+        ],
+        example: [
+          "Kondisi aktual: pencarian barang memakan 11 menit.",
+          "Kondisi ideal: pencarian barang cukup 1 menit.",
+          "Gap: ada selisih 10 menit, berarti ada masalah pada sistem penyimpanan atau pencarian."
+        ],
+        checks: [
+          "Tuliskan 3 masalah yang pernah Anda lihat di tempat kerja.",
+          "Dari 3 masalah itu, mana yang paling jelas memiliki gap dengan kondisi ideal?",
+          "Masalah itu termasuk area orang, proses, atau produk?"
+        ]
+      },
+      {
+        id: "bab-3",
+        title: "Langkah 1: Menentukan Tema",
+        level: "Dasar",
+        duration: "20 menit",
+        prereq: "Bab 2",
+        startHint: "Mulai dari sini jika Anda sudah melihat banyak masalah, tetapi belum tahu mana yang harus dipilih lebih dulu.",
+        goals: [
+          "Mampu memilih satu masalah yang paling penting untuk ditangani.",
+          "Mampu menjelaskan fokus masalah dengan singkat dan jelas.",
+          "Mampu melihat dampak bila masalah dibiarkan."
+        ],
+        summary: "Tema adalah masalah utama yang dipilih sebagai fokus improvement. Tahap ini membantu kita berhenti mengejar terlalu banyak hal sekaligus. Pilih satu masalah yang nyata, punya dampak besar, dan datanya bisa dijelaskan dengan jelas.",
+        terms: {
+          "Tema": "Masalah utama yang dipilih sebagai fokus perbaikan.",
+          "QCDSMPE": "Cara melihat dampak masalah terhadap kualitas, biaya, pengiriman, keselamatan, moral, produktivitas, dan lingkungan."
+        },
+        steps: [
+          "Buat daftar masalah yang terjadi atau pernah terjadi di lingkungan kerja.",
+          "Pilih satu masalah yang paling berdampak pada pekerjaan.",
+          "Tulis masalah dengan singkat, padat, dan jelas.",
+          "Tambahkan fakta yang menunjukkan masalah itu nyata.",
+          "Jelaskan dampaknya bila dibiarkan."
+        ],
+        example: [
+          "Tema: kehilangan tools maintenance masih sering terjadi setiap bulan.",
+          "Fakta: Januari hilang 3 tools, Februari 1 tool, Maret 2 tools.",
+          "Dampak: biaya penggantian naik dan pekerjaan terganggu."
+        ],
+        checks: [
+          "Buat daftar beberapa masalah di lingkungan kerja Anda.",
+          "Pilih satu masalah yang paling berdampak.",
+          "Tambahkan data fakta dan jelaskan dampak QCDSMPE-nya."
+        ]
+      },
+      {
+        id: "bab-4",
+        title: "Langkah 2: Analisa Kondisi Yang Ada",
+        level: "Menengah",
+        duration: "25 menit",
+        prereq: "Bab 3",
+        startHint: "Mulai dari sini jika Anda sudah memilih masalah, tetapi belum tahu masalah itu terjadi di titik proses yang mana.",
+        goals: [
+          "Mampu mengamati kondisi nyata di lapangan.",
+          "Mampu memetakan penyimpangan berdasarkan 4M1E.",
+          "Mampu membedakan kondisi OK dan NOK."
+        ],
+        summary: "Analisa kondisi membantu kita memahami masalah apa yang benar-benar terjadi dan di titik proses mana penyimpangan muncul. Dalam materi DELTA, observasi lapangan dipakai untuk menemukan petunjuk akar masalah, lalu temuan dikelompokkan ke dalam 4M1E.",
+        terms: {
+          "4M1E": "Kerangka untuk memeriksa masalah dari sisi manusia, mesin, metode, material, dan lingkungan.",
+          "Key point": "Titik penting yang harus diperhatikan saat mengamati proses.",
+          "Standard": "Kondisi yang seharusnya terjadi.",
+          "Aktual": "Kondisi yang benar-benar terjadi sekarang.",
+          "NOK": "Kondisi yang tidak sesuai standar."
+        },
+        steps: [
+          "Datangi proses yang bermasalah.",
+          "Catat standar dan kondisi aktual.",
+          "Kelompokkan temuan ke dalam 4M1E.",
+          "Tandai mana yang OK dan mana yang NOK.",
+          "Fokus pada temuan yang paling dekat dengan masalah utama."
+        ],
+        example: [
+          "Man: petugas belum hafal lokasi barang.",
+          "Method: belum ada sistem penamaan rak yang jelas.",
+          "Material: label barang tidak seragam.",
+          "Environment: area penyimpanan terlalu padat."
+        ],
+        checks: [
+          "Uraikan kondisi nyata masalah Anda dengan data atau fakta.",
+          "Lakukan analisa 4M1E.",
+          "Tandai mana yang OK dan mana yang NOK."
+        ]
+      },
+      {
+        id: "bab-5",
+        title: "Langkah 3: Menetapkan Target SMART",
+        level: "Dasar",
+        duration: "20 menit",
+        prereq: "Bab 4",
+        startHint: "Mulai dari sini jika Anda sudah tahu masalah dan kondisi saat ini, tetapi belum punya arah hasil yang jelas.",
+        goals: [
+          "Mampu membuat target yang jelas, terukur, dan punya batas waktu.",
+          "Mampu menghubungkan target dengan kondisi nyata dan kebutuhan kerja."
+        ],
+        summary: "Tanpa target, improvement sering berjalan tanpa arah. DELTA menekankan penggunaan target yang spesifik dan terukur agar hasil bisa dievaluasi secara adil. Target dapat bersumber dari kebutuhan perusahaan, customer, kondisi terbaik sebelumnya, dan hasil analisa kondisi.",
+        terms: {
+          "SMART": "Kerangka target yang Specific, Measurable, Achievable, Reasonable, dan Timebound.",
+          "Specific": "Tujuan perbaikan harus jelas, tidak umum.",
+          "Measurable": "Harus bisa diukur dengan angka atau indikator.",
+          "Timebound": "Harus memiliki batas waktu pencapaian."
+        },
+        steps: [
+          "Tulis kondisi saat ini dengan angka.",
+          "Tulis target yang ingin dicapai dengan angka.",
+          "Cek target dengan prinsip SMART.",
+          "Tetapkan batas waktu dan hasil yang diharapkan."
+        ],
+        example: [
+          "Kondisi sebelum: pencarian barang 11 menit.",
+          "Target: menurunkan waktu pencarian dari 11 menit menjadi 3 menit dalam 2 bulan.",
+          "Hasilnya jadi jelas, terukur, dan punya tenggat."
+        ],
+        checks: [
+          "Tentukan target SMART untuk masalah yang Anda pilih.",
+          "Cek ulang apakah target Anda sudah spesifik, terukur, realistis, dan punya batas waktu."
+        ]
+      },
+      {
+        id: "bab-6",
+        title: "Langkah 4: Analisa Sebab Akibat",
+        level: "Menengah",
+        duration: "25 menit",
+        prereq: "Bab 4 dan Bab 5",
+        startHint: "Mulai dari sini jika Anda sudah punya data masalah, tetapi belum tahu akar masalah yang paling layak diperbaiki.",
+        goals: [
+          "Mampu membedakan gejala dan penyebab.",
+          "Mampu menemukan akar penyebab masalah.",
+          "Mampu memilih penyebab yang benar-benar memicu masalah utama."
+        ],
+        summary: "Tahap ini dipakai untuk menganalisa faktor akar penyebab yang membuat masalah utama terjadi. Setelah temuan NOK terkumpul, kita perlu menggali lebih dalam sampai menemukan penyebab yang benar-benar mendasar dan bisa ditindaklanjuti.",
+        terms: {
+          "Penyebab langsung": "Hal yang terlihat paling dekat dengan masalah utama.",
+          "Akar penyebab": "Penyebab paling dasar yang memicu masalah berulang.",
+          "Sebab akibat": "Hubungan logis antara masalah dan pemicunya."
+        },
+        steps: [
+          "Ambil temuan NOK dari analisa 4M1E.",
+          "Tanyakan kenapa kondisi itu bisa terjadi.",
+          "Ulangi penggalian sampai ketemu penyebab yang paling mendasar.",
+          "Pilih penyebab yang paling bisa ditindaklanjuti."
+        ],
+        example: [
+          "Masalah: tools sering hilang.",
+          "Penyebab langsung: tools tidak dikembalikan ke tempat semula.",
+          "Akar penyebab: belum ada sistem penyimpanan tools yang standar."
+        ],
+        checks: [
+          "Cari akar masalah dari temuan 4M1E yang NOK.",
+          "Tulis minimal satu penyebab langsung dan satu akar penyebab."
+        ]
+      },
+      {
+        id: "bab-7",
+        title: "Langkah 5: Merencanakan Penanggulangan dengan 5W2H",
+        level: "Praktik",
+        duration: "30 menit",
+        prereq: "Bab 6",
+        startHint: "Mulai dari sini jika Anda sudah tahu akar masalah dan ingin menyusun rencana aksi yang jelas.",
+        goals: [
+          "Mampu memilih solusi terbaik dari beberapa alternatif.",
+          "Mampu membuat rencana aksi rinci dengan 5W2H.",
+          "Mampu menetapkan PIC, waktu, dan biaya."
+        ],
+        summary: "DELTA tidak berhenti di analisa. Setelah akar masalah ditemukan, kita menyusun solusi yang realistis, membandingkan alternatifnya, lalu memilih satu solusi terbaik. Setelah itu barulah rencana dijabarkan lewat 5W2H agar pelaksanaannya jelas.",
+        terms: {
+          "5W2H": "Kerangka merinci rencana aksi: What, Why, How, Who, Where, When, dan How Much.",
+          "PIC": "Orang yang bertanggung jawab menjalankan atau mengawal tindakan.",
+          "Alternative solusi": "Beberapa pilihan solusi yang dibandingkan sebelum memilih satu yang terbaik."
+        },
+        steps: [
+          "Tulis akar penyebab yang akan ditangani.",
+          "Buat 2 sampai 3 alternatif solusi.",
+          "Pilih satu solusi terbaik.",
+          "Isi tabel 5W2H.",
+          "Pastikan ada PIC, waktu, dan biaya yang jelas."
+        ],
+        example: [
+          "Root cause: belum ada sistem penyimpanan tools yang standar.",
+          "Solusi: membuat lemari penyimpanan tools dan aturan pengembaliannya.",
+          "How Much: Rp103.000.",
+          "Who: supervisor maintenance."
+        ],
+        checks: [
+          "Tentukan tabel solusi 5W2H dari akar masalah yang ditemukan.",
+          "Jika ada tiga alternatif solusi, jelaskan kenapa Anda memilih satu solusi yang terbaik."
+        ]
+      },
+      {
+        id: "bab-8",
+        title: "Langkah 6: Melaksanakan Penanggulangan",
+        level: "Praktik",
+        duration: "15 menit",
+        prereq: "Bab 7",
+        startHint: "Mulai dari sini jika rencana perbaikan sudah siap dan Anda ingin memastikan eksekusinya tertib.",
+        goals: [
+          "Mampu menjalankan aktivitas perbaikan sesuai rencana.",
+          "Mampu mendokumentasikan kondisi sebelum dan sesudah."
+        ],
+        summary: "Tahap ini berisi pelaksanaan rencana yang sudah disusun. Fokusnya bukan sekadar melakukan aksi, tetapi memastikan solusi benar-benar dijalankan sesuai jadwal dan terdokumentasi dengan baik agar nanti mudah dievaluasi.",
+        terms: {
+          "Pelaksanaan": "Menjalankan solusi yang sudah dipilih dan direncanakan.",
+          "Sebelum dan sesudah": "Bukti perubahan yang terjadi akibat improvement."
+        },
+        steps: [
+          "Jalankan solusi sesuai jadwal.",
+          "Pastikan PIC memahami tugas masing-masing.",
+          "Catat hambatan saat pelaksanaan.",
+          "Kumpulkan bukti kondisi sebelum dan sesudah."
+        ],
+        example: [
+          "Pasang label rak dan penanda lokasi.",
+          "Susun ulang barang sesuai lokator.",
+          "Sosialisasikan cara penggunaan sistem baru."
+        ],
+        checks: [
+          "Tulis tiga hal yang harus disiapkan sebelum pelaksanaan dimulai.",
+          "Jelaskan bukti apa yang akan Anda kumpulkan untuk menunjukkan perubahan."
+        ]
+      },
+      {
+        id: "bab-9",
+        title: "Langkah 7: Evaluasi Hasil dan Cost Benefit",
+        level: "Praktik",
+        duration: "30 menit",
+        prereq: "Bab 8",
+        startHint: "Mulai dari sini jika Anda ingin menilai apakah improvement benar-benar berhasil dan bermanfaat.",
+        goals: [
+          "Mampu membandingkan kondisi sebelum dan sesudah.",
+          "Mampu menilai dampak improvement terhadap QCDSMPE.",
+          "Mampu menghitung cost benefit sederhana."
+        ],
+        summary: "Evaluasi hasil dipakai untuk melihat apakah target tercapai, manfaatnya nyata, dan biaya yang dikeluarkan masuk akal. Dalam materi sumber, evaluasi dilakukan dengan membandingkan kondisi sebelum dan sesudah, menilai dampak QCDSMPE, lalu menghitung cost dan benefit.",
+        terms: {
+          "Benefit": "Keuntungan yang diperoleh dari improvement, bisa berupa uang, waktu, atau pengurangan kerugian.",
+          "Cost": "Biaya aktual yang dikeluarkan untuk menjalankan improvement.",
+          "Ratio Cost Benefit": "Perbandingan biaya dengan manfaat. Semakin kecil rasionya, semakin efisien perbaikannya."
+        },
+        steps: [
+          "Kumpulkan data sebelum dan sesudah.",
+          "Bandingkan hasil dengan target.",
+          "Hitung biaya aktual improvement.",
+          "Hitung manfaatnya secara nyata.",
+          "Tulis pengetahuan atau keahlian baru yang didapat."
+        ],
+        example: [
+          "Sebelum: kehilangan tools Rp1.700.000.",
+          "Sesudah: kehilangan tools Rp0.",
+          "Cost: Rp103.000.",
+          "Benefit: pengurangan kerugian Rp1.700.000."
+        ],
+        checks: [
+          "Tulis kondisi sebelum dan sesudah dari ide improvement Anda.",
+          "Hitung cost yang benar-benar keluar.",
+          "Tulis benefit yang paling nyata dan bandingkan dengan target."
+        ]
+      },
+      {
+        id: "bab-10",
+        title: "Langkah 8: Standarisasi dan Tindak Lanjut",
+        level: "Praktik",
+        duration: "15 menit",
+        prereq: "Bab 9",
+        startHint: "Mulai dari sini jika improvement sudah berhasil dan Anda ingin memastikan hasilnya tidak kembali turun.",
+        goals: [
+          "Mampu menjaga hasil improvement agar tetap berjalan.",
+          "Mampu menentukan bentuk standar kerja yang sesuai.",
+          "Mampu menyiapkan tindak lanjut setelah improvement."
+        ],
+        summary: "Standarisasi menjaga agar perbaikan tidak berhenti sebagai proyek sesaat. Hasil yang sudah baik harus diterjemahkan menjadi cara kerja baku, lalu diawasi agar tetap konsisten. Bentuknya bisa berupa SOP, instruksi kerja, atau formulir.",
+        terms: {
+          "Standarisasi": "Menetapkan cara kerja baku agar hasil tetap konsisten.",
+          "SOP": "Dokumen langkah kerja standar resmi yang harus diikuti.",
+          "Tindak lanjut": "Aktivitas lanjutan agar hasil improvement tetap terjaga atau terus dikembangkan."
+        },
+        steps: [
+          "Tentukan cara kerja baru yang harus dipertahankan.",
+          "Ubah menjadi dokumen standar.",
+          "Sosialisasikan kepada pihak yang terlibat.",
+          "Cek kepatuhan secara berkala.",
+          "Perbaiki standar jika ada perubahan kondisi."
+        ],
+        example: [
+          "Buat SOP peminjaman dan pengembalian tools.",
+          "Tempel daftar tools di lemari penyimpanan.",
+          "Tunjuk PIC audit mingguan pada bulan pertama."
+        ],
+        checks: [
+          "Dari improvement yang Anda pilih, standar apa yang paling cocok: SOP, instruksi kerja, atau formulir?",
+          "Siapa yang harus memastikan standar baru benar-benar dijalankan?"
+        ]
+      }
+    ];
+
+    const pdfPageGroups = [
+      { pages: expandPdfPages(1, 3), label: "Slide 1-3 | Pengantar SS Online with DELTA" },
+      { pages: expandPdfPages(4, 10), label: "Slide 4-10 | Kesadaran Akan Masalah" },
+      { pages: expandPdfPages(11, 13), label: "Slide 11-13 | Langkah 1: Menentukan Tema" },
+      { pages: [14], label: "Slide 14 | Langkah 2: Analisa Kondisi Yang Ada" },
+      { pages: expandPdfPages(15, 17), label: "Slide 15-17 | Langkah 3: Menetapkan Target SMART" },
+      { pages: [18], label: "Slide 18 | Langkah 4: Analisa Sebab Akibat" },
+      { pages: expandPdfPages(19, 20), label: "Slide 19-20 | Langkah 5: Merencanakan Penanggulangan dengan 5W2H" },
+      { pages: [21], label: "Slide 21 | Langkah 6: Melaksanakan Penanggulangan" },
+      { pages: expandPdfPages(21, 26), label: "Slide 21-26 | Langkah 7: Evaluasi Hasil dan Cost Benefit" },
+      { pages: [27], label: "Slide 27 | Langkah 8: Standarisasi dan Tindak Lanjut" }
+    ];
+
+    chapters.forEach((chapter, index) => {
+      chapter.pdfReference = pdfPageGroups[index];
+    });
+
+    const learningPath = {
+      id: "delta-sequence",
+      title: "Urutan Belajar Utama",
+      description: "Pelajari bab 1 sampai bab 10 secara berurutan untuk memahami DELTA secara utuh dari dasar hingga praktik.",
+      chapters: chapters.map((_, index) => index),
+      banner: "Urutan belajar ideal adalah mengikuti bab 1 sampai bab 10 secara berurutan agar alur DELTA dipahami secara utuh."
+    };
+
+    const badgeDefinitions = [
+      { id: "mulai", title: "Mulai", test: (count) => count >= 1 },
+      { id: "konsisten", title: "Konsisten", test: (count) => count >= 3 },
+      { id: "tuntas", title: "Tuntas", test: (count) => count === chapters.length }
+    ];
+
+    const chapterThemes = [
+      { accent: "#0f766e", accentSoft: "rgba(15, 118, 110, 0.12)", warm: "#d97706", warmSoft: "rgba(217, 119, 6, 0.12)", hero: "rgba(15, 118, 110, 0.9)" },
+      { accent: "#b45309", accentSoft: "rgba(180, 83, 9, 0.12)", warm: "#ea580c", warmSoft: "rgba(234, 88, 12, 0.12)", hero: "rgba(180, 83, 9, 0.9)" },
+      { accent: "#4338ca", accentSoft: "rgba(67, 56, 202, 0.12)", warm: "#db2777", warmSoft: "rgba(219, 39, 119, 0.12)", hero: "rgba(67, 56, 202, 0.88)" },
+      { accent: "#166534", accentSoft: "rgba(22, 101, 52, 0.12)", warm: "#65a30d", warmSoft: "rgba(101, 163, 13, 0.12)", hero: "rgba(22, 101, 52, 0.9)" },
+      { accent: "#0369a1", accentSoft: "rgba(3, 105, 161, 0.12)", warm: "#0891b2", warmSoft: "rgba(8, 145, 178, 0.12)", hero: "rgba(3, 105, 161, 0.9)" },
+      { accent: "#7c3aed", accentSoft: "rgba(124, 58, 237, 0.12)", warm: "#c026d3", warmSoft: "rgba(192, 38, 211, 0.12)", hero: "rgba(124, 58, 237, 0.86)" },
+      { accent: "#c2410c", accentSoft: "rgba(194, 65, 12, 0.12)", warm: "#dc2626", warmSoft: "rgba(220, 38, 38, 0.12)", hero: "rgba(194, 65, 12, 0.9)" },
+      { accent: "#0f766e", accentSoft: "rgba(15, 118, 110, 0.12)", warm: "#0284c7", warmSoft: "rgba(2, 132, 199, 0.12)", hero: "rgba(15, 118, 110, 0.88)" },
+      { accent: "#be123c", accentSoft: "rgba(190, 18, 60, 0.12)", warm: "#ca8a04", warmSoft: "rgba(202, 138, 4, 0.12)", hero: "rgba(190, 18, 60, 0.86)" },
+      { accent: "#065f46", accentSoft: "rgba(6, 95, 70, 0.12)", warm: "#059669", warmSoft: "rgba(5, 150, 105, 0.12)", hero: "rgba(6, 95, 70, 0.9)" }
+    ];
+
+    const savedCompleted = JSON.parse(localStorage.getItem("deltaCompletedChapters") || "[]");
+    const savedXp = Number(localStorage.getItem("deltaXp") || "0");
+    const savedFocus = localStorage.getItem("deltaFocusMode") === "true";
+    const savedStayChapter = Number(localStorage.getItem("deltaStayChapter") || "-1");
+    const savedChecklistState = JSON.parse(localStorage.getItem("deltaChecklistState") || "{}");
+
+    const state = {
+      currentChapter: 0,
+      completed: new Set(savedCompleted),
+      xp: Number.isFinite(savedXp) ? savedXp : savedCompleted.length * XP_PER_CHAPTER,
+      badges: [],
+      routeCompletion: {},
+      focusedView: savedFocus,
+      nextRecommendedChapter: 0,
+      chapterStatusMap: {},
+      flowGuideMessage: "",
+      acknowledgedStayChapter: savedStayChapter,
+      showCompletionPrompt: false,
+      lastCompletedChapter: null,
+      postCompletionNextChapter: null,
+      checklistState: savedChecklistState && typeof savedChecklistState === "object" ? savedChecklistState : {},
+      currentPdfPage: null,
+      currentPdfPages: [],
+      pdfReferenceChapter: null
+    };
+
+    const pageEl = document.getElementById("page");
+    const chapterButtonsEl = document.getElementById("chapterButtons");
+    const chapterTitleEl = document.getElementById("chapterTitle");
+    const levelPillEl = document.getElementById("levelPill");
+    const durationPillEl = document.getElementById("durationPill");
+    const prereqPillEl = document.getElementById("prereqPill");
+    const routeBannerEl = document.getElementById("routeBanner");
+    const helperBannerEl = document.getElementById("helperBanner");
+    const flowGuideEl = document.getElementById("flowGuide");
+    const flowGuideTitleEl = document.getElementById("flowGuideTitle");
+    const flowGuideTextEl = document.getElementById("flowGuideText");
+    const followFlowBtnEl = document.getElementById("followFlowBtn");
+    const stayHereBtnEl = document.getElementById("stayHereBtn");
+    const stepperEl = document.getElementById("stepper");
+    const summaryTextEl = document.getElementById("summaryText");
+    const goalsListEl = document.getElementById("goalsList");
+    const stepsListEl = document.getElementById("stepsList");
+    const exampleListEl = document.getElementById("exampleList");
+    const checksListEl = document.getElementById("checksList");
+    const termButtonsEl = document.getElementById("termButtons");
+    const termPanelEl = document.getElementById("termPanel");
+    const doneBtnEl = document.getElementById("doneBtn");
+    const completionPanelEl = document.getElementById("completionPanel");
+    const completionIconEl = completionPanelEl.querySelector(".completion-icon");
+    const completionTitleEl = document.getElementById("completionTitle");
+    const completionTextEl = document.getElementById("completionText");
+    const completionNextBtnEl = document.getElementById("completionNextBtn");
+    const completionStayBtnEl = document.getElementById("completionStayBtn");
+    const nextBtnEl = document.getElementById("nextBtn");
+    const resetBtnEl = document.getElementById("resetBtn");
+    const returnToRouteBtnEl = document.getElementById("returnToRouteBtn");
+    const focusToggleBtnEl = document.getElementById("focusToggleBtn");
+    const startRouteBtnEl = document.getElementById("startRouteBtn");
+    const progressRingEl = document.getElementById("progressRing");
+    const progressPercentEl = document.getElementById("progressPercent");
+    const completedCountEl = document.getElementById("completedCount");
+    const progressHeadlineEl = document.getElementById("progressHeadline");
+    const progressSubcopyEl = document.getElementById("progressSubcopy");
+    const heroHelperEl = document.getElementById("heroHelper");
+    const heroXpEl = document.getElementById("heroXp");
+    const heroRouteTitleEl = document.getElementById("heroRouteTitle");
+    const heroRouteProgressEl = document.getElementById("heroRouteProgress");
+    const xpPillEl = document.getElementById("xpPill");
+    const badgeListEl = document.getElementById("badgeList");
+    const routeCardTitleEl = document.getElementById("routeCardTitle");
+    const routeCardTextEl = document.getElementById("routeCardText");
+    const xpTitleEl = document.getElementById("xpTitle");
+    const xpDescriptionEl = document.getElementById("xpDescription");
+    const overviewCardEl = document.getElementById("overviewCard");
+    const goalsCardEl = document.getElementById("goalsCard");
+    const stepsCardEl = document.getElementById("stepsCard");
+    const quizCardEl = document.getElementById("quizCard");
+    const termsCardEl = document.getElementById("termsCard");
+    const exampleCardEl = document.getElementById("exampleCard");
+    const gameCardEl = document.getElementById("gameCard");
+    const pdfReferenceCardEl = document.getElementById("pdfReferenceCard");
+    const pdfReferenceTextEl = document.getElementById("pdfReferenceText");
+    const pdfReferenceStatusEl = document.getElementById("pdfReferenceStatus");
+    const pdfOpenBtnEl = document.getElementById("pdfOpenBtn");
+    let pdfPreviewEl = document.getElementById("pdfPreview");
+    const pdfReferenceNoteEl = document.getElementById("pdfReferenceNote");
+
+    function persistState() {
+      localStorage.setItem("deltaCompletedChapters", JSON.stringify([...state.completed]));
+      localStorage.setItem("deltaXp", String(state.xp));
+      localStorage.setItem("deltaFocusMode", String(state.focusedView));
+      localStorage.setItem("deltaStayChapter", String(state.acknowledgedStayChapter));
+      localStorage.setItem("deltaChecklistState", JSON.stringify(state.checklistState));
+    }
+
+    function getChapterChecklistState(chapterId, totalChecks) {
+      const storedChecks = state.checklistState[chapterId];
+      if (!Array.isArray(storedChecks)) {
+        const initialState = new Array(totalChecks).fill(false);
+        state.checklistState[chapterId] = initialState;
+        return initialState;
+      }
+
+      if (storedChecks.length !== totalChecks) {
+        const normalizedState = new Array(totalChecks).fill(false).map((_, index) => Boolean(storedChecks[index]));
+        state.checklistState[chapterId] = normalizedState;
+        return normalizedState;
+      }
+
+      return storedChecks.map((item) => Boolean(item));
+    }
+
+    function getCurrentRoute() {
+      return learningPath;
+    }
+
+    function computeRouteCompletion() {
+      state.routeCompletion = {};
+      const completedCount = learningPath.chapters.filter((index) => state.completed.has(chapters[index].id)).length;
+      state.routeCompletion[learningPath.id] = {
+        completedCount,
+        total: learningPath.chapters.length,
+        percentage: Math.round((completedCount / learningPath.chapters.length) * 100)
+      };
+    }
+
+    function computeBadges() {
+      const count = state.completed.size;
+      state.badges = badgeDefinitions.filter((badge) => badge.test(count)).map((badge) => badge.id);
+    }
+
+    function saveDerivedProgress() {
+      state.xp = state.completed.size * XP_PER_CHAPTER;
+      computeBadges();
+      computeRouteCompletion();
+      persistState();
+    }
+
+    function helperMessage() {
+      const count = state.completed.size;
+      if (count === 0) {
+        return "Belum ada bab yang selesai. Saran terbaik: mulai dari bab pertama agar alur DELTA terasa utuh sejak awal.";
+      }
+
+      if (count === chapters.length) {
+        return "Semua bab sudah selesai. Anda bisa mengulang bab tertentu untuk pendalaman atau fokus pada evaluasi dan standarisasi.";
+      }
+
+      return `Anda sudah menyelesaikan ${count} bab. Lanjutkan urutan belajar utama agar ritme pembelajaran tetap fokus.`;
+    }
+
+    function jumpToRoute() {
+      state.showCompletionPrompt = false;
+      state.currentChapter = state.nextRecommendedChapter;
+      renderAll();
+    }
+
+    function applyChapterTheme(index) {
+      const theme = chapterThemes[index] || chapterThemes[0];
+      document.documentElement.style.setProperty("--chapter-accent", theme.accent);
+      document.documentElement.style.setProperty("--chapter-accent-soft", theme.accentSoft);
+      document.documentElement.style.setProperty("--chapter-warm", theme.warm);
+      document.documentElement.style.setProperty("--chapter-warm-soft", theme.warmSoft);
+      document.documentElement.style.setProperty("--chapter-hero", theme.hero);
+    }
+
+    function computeFlowState() {
+      const route = getCurrentRoute();
+      const firstIncomplete = route.chapters.find((index) => !state.completed.has(chapters[index].id));
+      state.nextRecommendedChapter = firstIncomplete ?? route.chapters[route.chapters.length - 1] ?? 0;
+      state.chapterStatusMap = {};
+
+      chapters.forEach((chapter, index) => {
+        let status = "later";
+        if (state.completed.has(chapter.id)) {
+          status = "done";
+        } else if (index === state.currentChapter) {
+          status = "current";
+        } else if (index === state.nextRecommendedChapter) {
+          status = "next";
+        } else if (route.chapters.includes(index)) {
+          status = "available";
+        }
+        state.chapterStatusMap[index] = status;
+      });
+
+      const nextTitle = chapters[state.nextRecommendedChapter]?.title || "langkah berikutnya";
+      if (state.currentChapter === state.nextRecommendedChapter) {
+        state.flowGuideMessage = `Anda sedang berada di langkah yang tepat. Selesaikan bab ini dulu, lalu lanjut ke langkah berikutnya setelah progress diperbarui.`;
+      } else if (state.acknowledgedStayChapter === state.currentChapter) {
+        state.flowGuideMessage = `Anda memilih tetap mempelajari bab ini. Namun flow ideal berikutnya tetap ${nextTitle}.`;
+      } else {
+        state.flowGuideMessage = `Bab ini tetap bisa dipelajari, tetapi flow ideal saat ini mengarahkan Anda ke ${nextTitle}.`;
+      }
+    }
+
+    function closeCompletionPrompt() {
+      state.showCompletionPrompt = false;
+      state.lastCompletedChapter = null;
+      state.postCompletionNextChapter = null;
+    }
+
+    function buildPdfReferenceUrl(page, chapterToken = "default") {
+      const query = `chapter=${encodeURIComponent(chapterToken)}&page_ref=${page}`;
+      return `${encodeURI(pdfSource)}?${query}#page=${page}&view=FitH&zoom=page-fit&navpanes=0`;
+    }
+
+    function loadPdfPreview(pdfUrl) {
+      const nextPreview = document.createElement("iframe");
+      nextPreview.className = "pdf-preview";
+      nextPreview.id = "pdfPreview";
+      nextPreview.title = "Preview PDF DELTA";
+      nextPreview.loading = "eager";
+      nextPreview.setAttribute("src", pdfUrl);
+      pdfPreviewEl.replaceWith(nextPreview);
+      pdfPreviewEl = nextPreview;
+    }
+
+    function fillNumberedList(target, items) {
+      target.innerHTML = "";
+      items.forEach((item, index) => {
+        const li = document.createElement("li");
+        const badge = document.createElement("span");
+        badge.className = "list-index";
+        badge.textContent = String(index + 1);
+
+        const copy = document.createElement("div");
+        copy.textContent = item;
+
+        li.appendChild(badge);
+        li.appendChild(copy);
+        target.appendChild(li);
+      });
+    }
+
+    function renderTerms(terms) {
+      termButtonsEl.innerHTML = "";
+      const entries = Object.entries(terms);
+
+      entries.forEach(([term, meaning], index) => {
+        const btn = document.createElement("button");
+        btn.className = `chip-btn ${index === 0 ? "active" : ""}`;
+        btn.textContent = term;
+        btn.addEventListener("click", () => {
+          [...termButtonsEl.children].forEach((child) => child.classList.remove("active"));
+          btn.classList.add("active");
+          termPanelEl.innerHTML = `<strong>${term}</strong><br>${meaning}`;
+        });
+        termButtonsEl.appendChild(btn);
+
+        if (index === 0) {
+          termPanelEl.innerHTML = `<strong>${term}</strong><br>${meaning}`;
+        }
+      });
+    }
+
+    function renderChecks(chapter) {
+      checksListEl.innerHTML = "";
+      const checks = chapter.checks;
+      const chapterChecks = getChapterChecklistState(chapter.id, checks.length);
+
+      checks.forEach((check, index) => {
+        const label = document.createElement("label");
+        label.className = "check-card";
+
+        const input = document.createElement("input");
+        input.type = "checkbox";
+        input.setAttribute("aria-label", `Latihan ${index + 1}`);
+        input.checked = chapterChecks[index];
+        input.addEventListener("change", () => {
+          chapterChecks[index] = input.checked;
+          state.checklistState[chapter.id] = [...chapterChecks];
+          persistState();
+        });
+
+        const copy = document.createElement("div");
+        copy.textContent = check;
+
+        label.appendChild(input);
+        label.appendChild(copy);
+        checksListEl.appendChild(label);
+      });
+    }
+
+    function renderBadges() {
+      badgeListEl.innerHTML = "";
+      badgeDefinitions.forEach((badge) => {
+        const pill = document.createElement("div");
+        const unlocked = state.badges.includes(badge.id);
+        pill.className = `badge-pill ${unlocked ? "unlocked" : ""}`;
+        pill.textContent = unlocked ? `${badge.title} terbuka` : badge.title;
+        badgeListEl.appendChild(pill);
+      });
+    }
+
+    function renderProgress() {
+      const completedCount = state.completed.size;
+      const percentage = Math.round((completedCount / chapters.length) * 100);
+      const route = getCurrentRoute();
+      const routeProgress = state.routeCompletion[route.id];
+      const nextTitle = chapters[state.nextRecommendedChapter]?.title || "langkah berikutnya";
+
+      progressRingEl.style.setProperty("--progress", percentage);
+      progressPercentEl.textContent = `${percentage}%`;
+      completedCountEl.textContent = `${completedCount} / ${chapters.length} bab`;
+      progressHeadlineEl.textContent = `${completedCount} dari ${chapters.length} bab selesai`;
+      progressSubcopyEl.textContent = completedCount === 0
+        ? "Progres akan bertambah setiap kali satu bab dikonfirmasi selesai."
+        : `Anda sudah mengumpulkan ${state.xp} XP dari progres belajar ini.`;
+
+      heroHelperEl.textContent = helperMessage();
+      heroXpEl.textContent = `${state.xp} XP`;
+      heroRouteTitleEl.textContent = completedCount === chapters.length ? "Semua bab selesai" : nextTitle;
+      heroRouteProgressEl.textContent = completedCount === chapters.length
+        ? "Seluruh materi utama sudah dituntaskan."
+        : `${routeProgress.total - routeProgress.completedCount} bab masih perlu dipelajari.`;
+      xpPillEl.textContent = `${state.xp} XP`;
+      xpTitleEl.textContent = completedCount === 0 ? "Progress XP" : "Progress Anda terus naik";
+      xpDescriptionEl.textContent = completedCount === 0
+        ? "Selesaikan bab pertama untuk membuka badge awal."
+        : "Setiap bab selesai memberi dorongan kecil agar ritme belajar tetap terjaga.";
+      routeCardTitleEl.textContent = `Urutan Belajar | ${routeProgress.percentage}%`;
+      routeCardTextEl.textContent = routeProgress.percentage === 100
+        ? "Urutan belajar utama sudah tuntas. Anda bisa mengulang bab tertentu untuk pendalaman."
+        : `Masih ada ${routeProgress.total - routeProgress.completedCount} bab yang belum selesai. Langkah berikutnya yang direkomendasikan: ${nextTitle}.`;
+      renderBadges();
+    }
+
+    function renderPdfReference(chapter) {
+      const reference = chapter.pdfReference || { pages: [], label: chapter.title };
+      const pages = Array.isArray(reference.pages) ? [...reference.pages] : [];
+
+      if (state.pdfReferenceChapter !== chapter.id) {
+        state.pdfReferenceChapter = chapter.id;
+        state.currentPdfPages = pages;
+        state.currentPdfPage = pages[0] ?? null;
+      } else {
+        state.currentPdfPages = pages;
+        if (!pages.includes(state.currentPdfPage)) {
+          state.currentPdfPage = pages[0] ?? null;
+        }
+      }
+
+      const currentPage = state.currentPdfPage;
+      const rangeLabel = pages.length > 1 ? `${pages[0]}-${pages[pages.length - 1]}` : `${pages[0] ?? "-"}`;
+      pdfReferenceTextEl.textContent = `Referensi ini diambil dari PDF sumber dan dibatasi pada slide yang relevan untuk ${chapter.title}.`;
+      pdfReferenceStatusEl.textContent = currentPage
+        ? `Slide ${rangeLabel} | Preview dimulai dari slide ${currentPage}`
+        : "Referensi PDF belum tersedia";
+
+      if (currentPage) {
+        const pdfUrl = buildPdfReferenceUrl(currentPage, chapter.id);
+        loadPdfPreview(pdfUrl);
+        pdfOpenBtnEl.href = pdfUrl;
+        pdfReferenceNoteEl.textContent = `${reference.label}. Jika preview tidak tampil di browser Anda, gunakan tombol Buka PDF untuk membuka slide referensi bab ini secara langsung.`;
+      } else {
+        pdfPreviewEl.setAttribute("src", "about:blank");
+        pdfOpenBtnEl.href = encodeURI(pdfSource);
+        pdfReferenceNoteEl.textContent = "File referensi PDF belum dapat ditampilkan. Gunakan tombol Buka PDF setelah file tersedia di folder proyek.";
+      }
+    }
+
+    function renderNavigation() {
+      chapterButtonsEl.innerHTML = "";
+      chapters.forEach((chapter, index) => {
+        const btn = document.createElement("button");
+        const status = state.chapterStatusMap[index];
+        const stateLabel = status === "done"
+          ? "Sudah selesai"
+          : status === "current"
+            ? "Sedang dipelajari"
+            : status === "next"
+              ? "Langkah berikutnya"
+              : status === "available"
+                ? "Tersedia"
+                : "Bisa dipelajari nanti";
+        btn.className = `chapter-btn ${status}`;
+        btn.innerHTML = `<strong>${index + 1}. ${chapter.title}</strong><small>${chapter.level} | ${chapter.duration} | ${stateLabel}</small>`;
+        if (status === "current") btn.setAttribute("aria-current", "step");
+        btn.addEventListener("click", () => {
+          state.currentChapter = index;
+          if (state.acknowledgedStayChapter !== index) state.acknowledgedStayChapter = -1;
+          closeCompletionPrompt();
+          renderAll();
+        });
+        chapterButtonsEl.appendChild(btn);
+      });
+
+      stepperEl.innerHTML = "";
+      chapters.forEach((chapter, index) => {
+        const step = document.createElement("button");
+        const status = state.chapterStatusMap[index];
+        step.type = "button";
+        step.className = `step ${status}`;
+        step.innerHTML = `<strong>${index + 1}</strong><small>${chapter.title.replace("Langkah ", "").replace("Pengantar SS Online with DELTA", "Pengantar").replace("Kesadaran Akan Masalah", "Masalah")}</small>`;
+        if (status === "current") step.setAttribute("aria-current", "step");
+        step.addEventListener("click", () => {
+          state.currentChapter = index;
+          if (state.acknowledgedStayChapter !== index) state.acknowledgedStayChapter = -1;
+          closeCompletionPrompt();
+          renderAll();
+        });
+        stepperEl.appendChild(step);
+      });
+    }
+
+    function triggerSwapAnimation() {
+      [overviewCardEl, goalsCardEl, stepsCardEl, quizCardEl, termsCardEl, exampleCardEl, gameCardEl, pdfReferenceCardEl].forEach((el) => {
+        el.classList.remove("swap");
+        void el.offsetWidth;
+        el.classList.add("swap");
+      });
+    }
+
+    function renderChapter() {
+      const chapter = chapters[state.currentChapter];
+      const route = getCurrentRoute();
+      const currentStatus = state.chapterStatusMap[state.currentChapter];
+      const nextTitle = chapters[state.nextRecommendedChapter]?.title || "langkah berikutnya";
+      const isAlignedWithFlow = state.currentChapter === state.nextRecommendedChapter;
+      const currentRouteIndex = route.chapters.indexOf(state.currentChapter);
+      const nextInRoute = currentRouteIndex >= 0
+        ? route.chapters.slice(currentRouteIndex + 1).find((index) => !state.completed.has(chapters[index].id))
+        : undefined;
+      const hasGuidedNext = Number.isInteger(nextInRoute) || (!isAlignedWithFlow && Number.isInteger(state.nextRecommendedChapter));
+
+      applyChapterTheme(state.currentChapter);
+      completionIconEl.innerHTML = "&#10003;";
+      chapterTitleEl.textContent = chapter.title;
+      levelPillEl.textContent = `Level: ${chapter.level}`;
+      durationPillEl.textContent = `Estimasi: ${chapter.duration}`;
+      prereqPillEl.textContent = `Prasyarat: ${chapter.prereq}`;
+      routeBannerEl.textContent = route.banner;
+      helperBannerEl.textContent = chapter.startHint;
+      summaryTextEl.textContent = chapter.summary;
+      flowGuideEl.className = `flow-guide ${isAlignedWithFlow ? "success" : "warning"}`;
+      flowGuideTitleEl.textContent = isAlignedWithFlow ? "Flow Anda sudah sesuai" : "Guide Flow Belajar";
+      flowGuideTextEl.textContent = state.flowGuideMessage;
+      followFlowBtnEl.textContent = `Ikuti urutan: ${nextTitle}`;
+      followFlowBtnEl.disabled = isAlignedWithFlow;
+      if (currentStatus === "current") {
+        nextBtnEl.textContent = "Selesaikan bab ini dulu";
+        nextBtnEl.disabled = true;
+      } else if (!hasGuidedNext && isAlignedWithFlow) {
+        nextBtnEl.textContent = "Semua bab sudah selesai";
+        nextBtnEl.disabled = true;
+      } else if (isAlignedWithFlow) {
+        nextBtnEl.textContent = "Lanjut ke langkah berikutnya";
+        nextBtnEl.disabled = false;
+      } else {
+        nextBtnEl.textContent = "Ke langkah disarankan";
+        nextBtnEl.disabled = false;
+      }
+
+      fillNumberedList(goalsListEl, chapter.goals);
+      fillNumberedList(stepsListEl, chapter.steps);
+      fillNumberedList(exampleListEl, chapter.example);
+      renderTerms(chapter.terms);
+      renderChecks(chapter);
+      renderPdfReference(chapter);
+
+      const alreadyDone = state.completed.has(chapter.id);
+      doneBtnEl.textContent = alreadyDone ? "Bab ini sudah dikonfirmasi selesai" : "Konfirmasi selesai";
+      doneBtnEl.disabled = alreadyDone;
+      stayHereBtnEl.disabled = state.acknowledgedStayChapter === state.currentChapter || isAlignedWithFlow;
+
+      if (state.showCompletionPrompt && state.lastCompletedChapter !== null) {
+        const completedChapter = chapters[state.lastCompletedChapter];
+        const nextChapter = state.postCompletionNextChapter !== null ? chapters[state.postCompletionNextChapter] : null;
+        completionPanelEl.classList.add("show");
+        completionTitleEl.textContent = `Bab "${completedChapter.title}" berhasil dikonfirmasi selesai`;
+        completionTextEl.textContent = nextChapter
+          ? `Progress Anda sudah diperbarui. Apakah ingin lanjut ke bab berikutnya yang direkomendasikan, yaitu "${nextChapter.title}"?`
+          : "Progress Anda sudah diperbarui dan seluruh urutan belajar tampak sudah selesai. Anda bisa tetap di bab ini atau meninjau bab lain.";
+        completionNextBtnEl.textContent = nextChapter ? "Lanjut ke bab berikutnya" : "Tutup dan lanjut belajar";
+      } else {
+        completionPanelEl.classList.remove("show");
+      }
+
+      triggerSwapAnimation();
+    }
+
+    function syncFocusState() {
+      document.body.classList.toggle("focus-mode", state.focusedView);
+      focusToggleBtnEl.textContent = state.focusedView ? "Matikan mode fokus" : "Aktifkan mode fokus";
+    }
+
+    function renderAll() {
+      computeBadges();
+      computeRouteCompletion();
+      computeFlowState();
+      renderProgress();
+      renderNavigation();
+      renderChapter();
+      syncFocusState();
+    }
+
+    doneBtnEl.addEventListener("click", () => {
+      const chapter = chapters[state.currentChapter];
+      if (!state.completed.has(chapter.id)) {
+        const completedIndex = state.currentChapter;
+        state.completed.add(chapter.id);
+        saveDerivedProgress();
+        computeFlowState();
+        state.lastCompletedChapter = completedIndex;
+        state.postCompletionNextChapter = state.nextRecommendedChapter === completedIndex ? null : state.nextRecommendedChapter;
+        state.showCompletionPrompt = true;
+        renderAll();
+      }
+    });
+
+    nextBtnEl.addEventListener("click", () => {
+      if (state.currentChapter === state.nextRecommendedChapter) {
+        const route = getCurrentRoute();
+        const currentRouteIndex = route.chapters.indexOf(state.currentChapter);
+        const nextInRoute = route.chapters.slice(currentRouteIndex + 1).find((index) => !state.completed.has(chapters[index].id));
+        state.currentChapter = nextInRoute ?? state.nextRecommendedChapter;
+      } else {
+        state.currentChapter = state.nextRecommendedChapter;
+      }
+      state.acknowledgedStayChapter = -1;
+      closeCompletionPrompt();
+      renderAll();
+    });
+
+    resetBtnEl.addEventListener("click", () => {
+      state.completed.clear();
+      state.checklistState = {};
+      state.acknowledgedStayChapter = -1;
+      closeCompletionPrompt();
+      saveDerivedProgress();
+      renderAll();
+    });
+
+    returnToRouteBtnEl.addEventListener("click", () => {
+      jumpToRoute();
+    });
+
+    startRouteBtnEl.addEventListener("click", () => {
+      jumpToRoute();
+    });
+
+    followFlowBtnEl.addEventListener("click", () => {
+      state.acknowledgedStayChapter = -1;
+      closeCompletionPrompt();
+      jumpToRoute();
+    });
+
+    stayHereBtnEl.addEventListener("click", () => {
+      state.acknowledgedStayChapter = state.currentChapter;
+      persistState();
+      closeCompletionPrompt();
+      renderAll();
+    });
+
+    completionNextBtnEl.addEventListener("click", () => {
+      if (state.postCompletionNextChapter !== null) {
+        state.currentChapter = state.postCompletionNextChapter;
+      }
+      closeCompletionPrompt();
+      renderAll();
+    });
+
+    completionStayBtnEl.addEventListener("click", () => {
+      closeCompletionPrompt();
+      renderAll();
+    });
+
+    focusToggleBtnEl.addEventListener("click", () => {
+      state.focusedView = !state.focusedView;
+      persistState();
+      syncFocusState();
+    });
+
+    saveDerivedProgress();
+    renderAll();
+  </script>
+</body>
+</html>
